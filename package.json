@@ -1,0 +1,20 @@
+{
+  "name": "studio-manager",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:web": "npm run dev -w @studio/web",
+    "dev:server": "npm run dev -w @studio/server",
+    "db:up": "docker compose up -d db",
+    "db:generate": "npm run generate -w @studio/db",
+    "db:migrate": "npm run migrate -w @studio/db",
+    "test": "npm run test -w @studio/core",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build -w @studio/web"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

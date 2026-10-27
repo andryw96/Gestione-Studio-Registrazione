@@ -1,0 +1,35 @@
+# Postgres per lo studio. Per l'uso in rete locale: eseguire su un mini-PC sempre acceso.
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: studio
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-studio_dev_password}
+      POSTGRES_DB: studio
+    ports:
+      - "5432:5432"
+    volumes:
+      - studio_pgdata:/var/lib/postgresql/data
+      - ./backups:/backups
+
+  # Backup notturno (dump compresso, conserva gli ultimi 14 giorni)
+  backup:
+    image: postgres:16
+    restart: unless-stopped
+    depends_on: [db]
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-studio_dev_password}
+    volumes:
+      - ./backups:/backups
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          sleep 86400
+          pg_dump -h db -U studio studio | gzip > /backups/studio-$$(date +%F).sql.gz
+          find /backups -name 'studio-*.sql.gz' -mtime +14 -delete
+        done
+
+volumes:
+  studio_pgdata:
